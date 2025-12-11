@@ -12,13 +12,11 @@ fi
 
 # Function to call fuzzy finder with appropriate arguments
 run_fuzzy() {
-  local placeholder="$1"
   if [[ "$FUZZY_FINDER" == "walker" ]]; then
-    walker -d --placeholder "$placeholder"
+    walker -d --placeholder "$1"
   else
-    # fuzzel uses stdin and outputs to stdout
-    echo ""
-    fuzzel -d -p "$placeholder"
+    # fuzzel - don't pass placeholder to avoid display issues
+    fuzzel -d
   fi
 }
 
