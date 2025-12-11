@@ -17,6 +17,7 @@ run_fuzzy() {
     walker -d --placeholder "$placeholder"
   else
     # fuzzel uses stdin and outputs to stdout
+    echo ""
     fuzzel -d -p "$placeholder"
   fi
 }
