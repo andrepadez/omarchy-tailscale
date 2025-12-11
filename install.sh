@@ -50,12 +50,23 @@ check_dependencies() {
   print_info "Checking dependencies..."
   
   local missing=()
+  local fuzzy_finder=""
   
-  for cmd in tailscale walker jq; do
+  # Check for required dependencies
+  for cmd in tailscale jq; do
     if ! command -v "$cmd" &> /dev/null; then
       missing+=("$cmd")
     fi
   done
+  
+  # Check for fuzzy finder (walker or fuzzel)
+  if command -v walker &> /dev/null; then
+    fuzzy_finder="walker"
+  elif command -v fuzzel &> /dev/null; then
+    fuzzy_finder="fuzzel"
+  else
+    missing+=("walker or fuzzel")
+  fi
   
   if [ ${#missing[@]} -ne 0 ]; then
     print_error "Missing required dependencies: ${missing[*]}"
@@ -67,6 +78,7 @@ check_dependencies() {
   fi
   
   print_success "All dependencies found"
+  [ -n "$fuzzy_finder" ] && print_info "Using fuzzy finder: $fuzzy_finder"
 }
 
 # Create installation directory

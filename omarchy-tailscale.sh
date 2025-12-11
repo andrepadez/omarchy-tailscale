@@ -1,5 +1,26 @@
 #!/usr/bin/env bash
 
+# Detect which fuzzy finder is available
+if command -v walker &> /dev/null; then
+  FUZZY_FINDER="walker"
+elif command -v fuzzel &> /dev/null; then
+  FUZZY_FINDER="fuzzel"
+else
+  echo "Error: Neither walker nor fuzzel found in PATH"
+  exit 1
+fi
+
+# Function to call fuzzy finder with appropriate arguments
+run_fuzzy() {
+  local placeholder="$1"
+  if [[ "$FUZZY_FINDER" == "walker" ]]; then
+    walker -d --placeholder "$placeholder"
+  else
+    # fuzzel uses stdin and outputs to stdout
+    fuzzel -d -p "$placeholder"
+  fi
+}
+
 # --- Handle "status" arg ---
 if [[ "$1" == "status" ]]; then
   if ! tailscale status &>/dev/null; then
@@ -71,10 +92,10 @@ if [[ "$1" == "setup" ]]; then
   exit 0
 fi
 
-# --- Default (Walker Menu) ---
+# --- Default (Fuzzy Finder Menu) ---
 # Check if Tailscale is running
 if ! tailscale status &>/dev/null; then
-  action=$(echo -e "🔗 Start Tailscale\n❌ Exit" | walker -d --placeholder "Tailscale is Offline")
+  action=$(echo -e "🔗 Start Tailscale\n❌ Exit" | run_fuzzy "Tailscale is Offline")
   case "$action" in
     "🔗 Start Tailscale")
       sudo tailscale up
@@ -112,7 +133,7 @@ while IFS= read -r line; do
   fi
 done <<<"$accounts_data"
 
-# -------- Walker Menu --------
+# -------- Fuzzy Finder Menu --------
 
 show_menu() {
   {
@@ -134,7 +155,7 @@ show_menu() {
     fi
     
     echo "❌ Exit"
-  } | walker -d --placeholder "Select Tailscale Account"
+  } | run_fuzzy "Select Tailscale Account"
 }
 
 # -------- Menu Flow --------
